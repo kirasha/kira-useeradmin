@@ -75,7 +75,7 @@ UserSchema.methods.authenticate = function (password) {
 // static methods
 UserSchema.statics.findUniqueUsername = function (username, suffix, callback) {
   var _this = this;
-  var possibleUsername = username = (suffix || '');
+  var possibleUsername = username + (suffix || '');
 
   _this.findOne({
     username: possibleUsername
