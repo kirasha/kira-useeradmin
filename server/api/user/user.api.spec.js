@@ -13,7 +13,8 @@ describe('User API /api/users', function () {
   });
 
   after(function (done) {
-    server.close(done);
+    // server.close(done);
+    done();
   });
 
   it('Should respond with JSON with correct status', function (done) {
