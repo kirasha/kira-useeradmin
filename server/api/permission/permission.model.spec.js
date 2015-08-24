@@ -1,3 +1,5 @@
+'use strict';
+
 var should      = require('should'),
     mongoose    = require('mongoose'),
     config      = require('../../config/environment'),
@@ -8,7 +10,7 @@ var permission;
 function createPermission (name, description) {
   var permission = new Permission({
       name: name || 'User.View.List',
-      description: name || 'Gives permission to view users list',
+      description: description || 'Gives permission to view users list',
       active: true,
       builtIn: true
     });
@@ -61,6 +63,8 @@ describe('Permission Model', function () {
     it('should not create permission with the same permission name', function (done) {
       var anotherPermission = createPermission('User.View.List', 'A Duplicate permission that should not be saved');
       permission.save(function (err, res) {
+        should.not.exist(err);
+        should.exist(res);
         anotherPermission.save(function (err2, res2) {
           should.exist(err2);
           should.not.exist(res2);

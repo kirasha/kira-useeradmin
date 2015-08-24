@@ -22,13 +22,24 @@ require('./config/express')(app);
 // load routes
 require('./routes')(app);
 
-server.listen(config.port, function () {
-  console.log('Express server listening on %d in %s mode', config.port, app.get('env'));
-});
+function startServer () {
+  var server = http.createServer(app);
 
-module.exports = {
+  server.listen(config.port, function () {
+    console.log('Express server listening on %d in %s mode', config.port, app.get('env'));
+  });
 
-  app: app,
-  server: server
+  return server;
+}
 
-};
+function stopServer () {
+  mongoose.connection.close(function () {
+    console.log('closing database connection...');
+    process.exit(0);
+  });
+}
+
+exports = module.exports = app;
+
+app.startServer = startServer;
+app.stopServer = stopServer;

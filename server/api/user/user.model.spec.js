@@ -1,24 +1,18 @@
 'use strict';
 
-var should    = require('should'),
-    mongoose  = require('mongoose'),
-    config    = require('../../config/environment'),
-    User      = require('./user.model');
+var should      = require('should'),
+    TestHelper  = require('../../lib/testHelper'),
+    User        = require('./user.model');
 
 var user;
 
 describe('User Model', function () {
   before(function (done) {
-
-    mongoose.connect(config.mongo.uri, config.mongo.options);
-    // Clear users before testing
-    User.remove().exec().then(function () {
-      done();
-    });
+    TestHelper.prepare(User, done);
   });
 
   after(function (done) {
-    mongoose.connection.close(done);
+    TestHelper.end(done);
   });
 
   beforeEach(function (done) {
@@ -34,13 +28,12 @@ describe('User Model', function () {
   });
 
   afterEach(function (done) {
-    User.remove().exec().then(function () {
-      done();
-    });
+    TestHelper.clean(User, done);
   });
 
   it('should begin with no users', function (done) {
     User.find({}, function (err, users) {
+      should.not.exist(err);
       users.should.have.length(0);
       done();
     });
@@ -57,6 +50,7 @@ describe('User Model', function () {
   it('it should have a virtual method fullName', function (done) {
     user.save(function (err, res) {
       res.should.have.property('fullName');
+      should.not.exist(err);
       res.fullName.should.equal(user.firstName + ' ' + user.lastName);
       done();
     });
@@ -64,6 +58,7 @@ describe('User Model', function () {
 
   it('should fail when saving a duplicate user', function (done) {
     user.save(function (err) {
+      should.not.exist(err);
       var userDup = new User(user);
       userDup.save(function (err) {
         should.exist(err);
@@ -109,6 +104,7 @@ describe('User Model', function () {
   it('should find unique username', function (done) {
     user.save(function (err, res) {
       should.exist(res);
+      should.not.exist(err);
       User.findUniqueUsername(res.username, '', function (username) {
         should.exist(username);
         username.should.not.be.empty();

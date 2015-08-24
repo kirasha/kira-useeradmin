@@ -17,7 +17,7 @@ var openOptions = {
 module.exports = {
   nodemon: function (cb) {
     return nodemon({
-      script: 'server/app.js',
+      script: 'server/server.js',
       ext: 'js',
       ignore: ['client','gulp-tasks','dist','node_modules']
     })
