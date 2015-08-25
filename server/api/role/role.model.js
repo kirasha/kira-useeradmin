@@ -18,7 +18,8 @@ var RoleSchema  = new Schema({
   active: {
     type: Boolean,
     default: true
-  }
+  },
+  permissions: []
 });
 
 RoleSchema.plugin(uniqueValiator);

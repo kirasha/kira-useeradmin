@@ -86,4 +86,44 @@ describe('Role Model', function () {
     });
   });
 
+  describe('Role Permissions', function () {
+    it('should not give permission if the permission does not exist', function (done) {
+
+    });
+
+    it('should be able to add a permission to a role', function (done) {
+      role.save(function (err, res) {
+        should.not.exist(err);
+        should.exist(res);
+        res.givePermission('Admin.Role.Test', function (err2, newRole) {
+          should.not.exist(err2);
+          newRole.should.exist.and.have.a.property('permissions');
+          newRole.permissions.should.be.instanceof(Array);
+          newRole.permissions.should.have.length(1);
+        });
+      });
+    });
+
+    it('should be able to give multiple permssions at the same time', function (done) {
+
+    });
+
+    it('should give all permission to root user by default', function (done) {
+
+    });
+
+    it('should be able to revoke permssion to a role', function (done) {
+
+    });
+
+    it('should be able to revoke multiple permssions to a role', function (done) {
+
+    });
+
+    it('should not revoke a permission that a role does not have', function (done) {
+
+    });
+
+  });
+
 });
