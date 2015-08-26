@@ -86,6 +86,40 @@ describe('Permission Model', function () {
       done();
     });
 
+    it('should find or create a permission', function (done) {
+      Permission.findOrCreate({ name: permission.name }, function (err, res, created) {
+        should.not.exist(err);
+        should.exist(res);
+        created.should.equal(true);
+
+        var duplPermission = new Permission(res);
+        Permission.findOrCreate({ name: duplPermission.name }, function (err, res, created) {
+          should.not.exist(err);
+          should.exist(res);
+          created.should.equal(false);
+
+          Permission.find({}, function (err, permissions) {
+            should.not.exist(err);
+            permissions.should.have.length(1);
+
+            var newPermission = createPermission('Test.Permission');
+            var permissionObj = newPermission.toJSON();
+            Permission.findOrCreate({ name: newPermission.name }, permissionObj, function (err, permissionCreated, created) {
+              should.not.exist(err);
+              should.exist(permission);
+              created.should.equal(true);
+              permissionCreated.should.have.properties(permissionObj);
+              Permission.count({}, function (err, counts) {
+                should.not.exist(err);
+                counts.should.equal(2);
+                done(err);
+              });
+            });
+          });
+        });
+      });
+    });
+
   });
 
 });

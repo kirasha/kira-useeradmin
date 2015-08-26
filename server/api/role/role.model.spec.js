@@ -44,7 +44,7 @@ describe('Role Model', function () {
   });
 
   describe('create role', function () {
-    it('should begin with no permission', function (done) {
+    it('should begin with no roles', function (done) {
       Role.find({}, function (err, roles) {
         should.not.exist(err);
         roles.should.have.length(0);
@@ -52,7 +52,7 @@ describe('Role Model', function () {
       });
     });
 
-    it('should be able to create a permission', function (done) {
+    it('should be able to create a role', function (done) {
       role.save(function (err, res) {
         should.not.exist(err);
         should.exist(res);
@@ -87,9 +87,6 @@ describe('Role Model', function () {
   });
 
   describe('Role Permissions', function () {
-    it('should not give permission if the permission does not exist', function (done) {
-
-    });
 
     it('should be able to add a permission to a role', function (done) {
       role.save(function (err, res) {
@@ -102,6 +99,10 @@ describe('Role Model', function () {
           newRole.permissions.should.have.length(1);
         });
       });
+    });
+
+    it('should create permission if the permission does not exist', function (done) {
+
     });
 
     it('should be able to give multiple permssions at the same time', function (done) {

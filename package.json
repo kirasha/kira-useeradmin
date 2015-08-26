@@ -12,6 +12,7 @@
     "lodash": "^3.10.0",
     "method-override": "^2.3.5",
     "mongoose": "^4.1.0",
+    "mongoose-findorcreate": "^0.1.2",
     "mongoose-unique-validator": "^0.4.1"
   },
   "devDependencies": {
