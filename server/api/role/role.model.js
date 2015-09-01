@@ -2,7 +2,11 @@
 
 var mongoose        = require('mongoose'),
     uniqueValiator  = require('mongoose-unique-validator'),
+    findOrCreate    = require('mongoose-findorcreate'),
+    async           = require('async'),
     Schema          = mongoose.Schema;
+
+var Permission = require('../permission/permission.model');
 
 var RoleSchema  = new Schema({
   name: {
@@ -19,9 +23,105 @@ var RoleSchema  = new Schema({
     type: Boolean,
     default: true
   },
-  permissions: []
+  permissions: [{
+    type: Schema.Types.ObjectId, ref: 'Permission'
+  }]
 });
 
 RoleSchema.plugin(uniqueValiator);
+RoleSchema.plugin(findOrCreate);
 
-module.exports = mongoose.model('RoleSchema', RoleSchema);
+function getRoleModel () {
+  return mongoose.model('Role', RoleSchema);
+}
+
+RoleSchema.methods.assignPermissions = function (permissions, callback) {
+  var role, schema = this;
+
+  async.forEachOfSeries(permissions, function iterator (permission, index, cb) {
+    schema.assignPermission(permission, function (err, newRole) {
+      role = newRole;
+      cb(err);
+    });
+  }, function (err) {
+    callback(err, role);
+  });
+};
+
+RoleSchema.methods.assignPermission = function (permission, callback) {
+  var schema = this;
+  Permission.findOrCreate({ name: permission }, function (err, res, isNew) {
+    if (schema.permissions.indexOf(res._id) === -1) {
+      schema.permissions.push(res._id);
+      schema.save(function (err) {
+        // update root role as well
+        var rootRole = {
+          name: 'root',
+          description: 'Root role with all permissions',
+          builtIn: true,
+          active: true
+        };
+        schema.constructor.findOrCreate({ name: 'root' }, rootRole, function (err, root, isNew) {
+          if (!err && root) {
+            if (root.permissions.indexOf(res._id) == -1) {
+              root.permissions.push(res._id);
+              root.save(function (err) {
+                callback(err, schema);
+              });
+            } else {
+              callback(err, schema);
+            }
+          } else {
+            callback(err, schema);
+          }
+        });
+      });
+    } else {
+      return callback(null, schema);
+    }
+  });
+};
+
+RoleSchema.methods.revokePermission = function (permissionName, callback) {
+  var schema = this;
+
+  if (schema.permissions.length) {
+    Permission.findOne({ name: permissionName }, function (err, permission) {
+      if (!err && permission) {
+        var index = schema.permissions.indexOf(permission.id);
+
+        if (index != -1) {
+          schema.permissions.splice(index, 1);
+          schema.save(function (err, res) {
+            return callback(err, res);
+          });
+        }
+      } else {
+        return callback(err , schema, new Error('Role ' + schema.name + ' does not have Permission ' + permissionName));
+      }
+    });
+  } else {
+    return callback(null, schema, new Error('Role ' + schema.name + ' does not have Permission ' + permissionName));
+  }
+};
+
+RoleSchema.methods.revokePermissions = function (permissions, callback) {
+  var role,
+      warnings = [],
+      schema = this;
+
+  async.forEachOfSeries(permissions, function iterator (permission, index, cb) {
+    schema.revokePermission(permission, function (err, newRole, warning) {
+      role = newRole;
+      if (warning) {
+        warnings.push(warning);
+      }
+
+      cb(err);
+    });
+  }, function (err) {
+    callback(err, role, warnings);
+  });
+};
+
+module.exports = mongoose.model('Role', RoleSchema);

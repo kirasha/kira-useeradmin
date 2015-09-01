@@ -1,15 +1,16 @@
 'use strict';
 
-var should    = require('should'),
-    mongoose  = require('mongoose'),
-    config    = require('../../config/environment'),
-    Role      = require('./role.model.js');
+var should      = require('should'),
+    mongoose    = require('mongoose'),
+    config      = require('../../config/environment'),
+    Permission  = require('../permission/permission.model'),
+    Role        = require('./role.model');
 
 var role;
 
 function createRole (name, description) {
   var role = new Role({
-    name: name || 'root',
+    name: name || 'tester',
     description: description || 'Description of this role',
     builtIn: true,
     active: true
@@ -24,6 +25,10 @@ describe('Role Model', function () {
     mongoose.connect(config.mongo.uri, config.mongo.options);
 
     Role.remove().exec().then(function () {
+      done();
+    });
+
+    Permission.remove().exec().then(function () {
       done();
     });
   });
@@ -41,6 +46,10 @@ describe('Role Model', function () {
     Role.remove().exec().then(function () {
       done();
     });
+
+    Permission.remove().exec().then(function () {
+      done();
+    });
   });
 
   describe('create role', function () {
@@ -56,7 +65,7 @@ describe('Role Model', function () {
       role.save(function (err, res) {
         should.not.exist(err);
         should.exist(res);
-        res.name.should.equal('root');
+        res.name.should.equal(role.name);
         res.builtIn.should.equal(true);
         done();
       });
@@ -86,43 +95,191 @@ describe('Role Model', function () {
     });
   });
 
-  describe('Role Permissions', function () {
+  describe('Assign Permission to role', function () {
 
-    it('should be able to add a permission to a role', function (done) {
+    it('should be able to assign a permission to a role', function (done) {
       role.save(function (err, res) {
         should.not.exist(err);
         should.exist(res);
-        res.givePermission('Admin.Role.Test', function (err2, newRole) {
+        res.assignPermission('Admin.Role.Test', function (err2, newRole) {
           should.not.exist(err2);
-          newRole.should.exist.and.have.a.property('permissions');
+          should.exist(newRole);
+          newRole.should.have.property('permissions');
           newRole.permissions.should.be.instanceof(Array);
           newRole.permissions.should.have.length(1);
+          done();
         });
       });
     });
 
-    it('should create permission if the permission does not exist', function (done) {
+    it('should create the permission if it does not exist', function (done) {
+      role.save(function (err, res) {
+        should.not.exist(err);
+        should.exist(res);
+        res.assignPermission('Admin.Role.Test', function (err2, newRole) {
+          should.not.exist(err2);
+          Permission.find({}, function (err, permissions) {
+            should.not.exist(err);
+            should.exist(permissions);
+            permissions.should.have.length(1);
+            done();
+          });
+        });
+      });
+    });
+
+    it('should not create permission if the permission already exists', function (done) {
+      var permission = new Permission({
+          name: 'Admin.Role.Test',
+          description: 'Test Permission',
+          active: true,
+          builtIn: true
+        });
+
+      permission.save(function (err, perm) {
+        role.save(function (err, res) {
+          should.not.exist(err);
+          should.exist(res);
+          res.assignPermission('Admin.Role.Test', function (err2, newRole) {
+            should.not.exist(err2);
+            Permission.find({}, function (err, permissions) {
+              should.not.exist(err);
+              should.exist(permissions);
+              permissions.should.have.length(1);
+              done();
+            });
+          });
+        });
+      });
+    });
+
+    it('should be able to give multiple permissions at the same time', function (done) {
+      var permissionsArr = ['Admin.Role.Test', 'Manager.Role.Test', 'Default.Role.Test'];
+      role.save(function (err, res) {
+        should.not.exist(err);
+        should.exist(res);
+        res.assignPermissions(permissionsArr, function (err2, newRole) {
+          should.not.exist(err2);
+          newRole.permissions.should.have.length(permissionsArr.length);
+          done();
+        });
+      });
+    });
+
+    it('should give all permission to root role by default', function (done) {
+
+      var permissionsArr = ['Admin.Role.Test', 'Manager.Role.Test', 'Default.Role.Test'];
+      role.save(function (err, res) {
+        should.not.exist(err);
+        should.exist(res);
+        res.assignPermissions(permissionsArr, function (err2, newRole) {
+          should.not.exist(err2);
+          Role.findOne({ name: 'root' }, function (err, root) {
+            should.not.exist(err);
+            root.should.have.property('permissions');
+            root.permissions.should.have.length(permissionsArr.length);
+            root.permissions[0].toString().should.equal(newRole.permissions[0].toString());
+            done();
+          });
+        });
+      });
+    });
+
+    it('should not reassign permission if the role already have it', function (done) {
+
+      var rootRole = createRole('root', 'Root role with all permissions');
+      var permissionsArr = ['Admin.Role.Test', 'Manager.Role.Test', 'Default.Role.Test','Admin.Role.Test' ];
+
+      rootRole.save(function (err, root) {
+        should.not.exist(err);
+        should.exist(root);
+        root.assignPermission('Admin.Role.Test', function (err, res) {
+          should.not.exist(err);
+          should.exist(res);
+          res.permissions.should.have.length(1);
+          role.save(function (err, res) {
+            should.not.exist(err);
+            should.exist(res);
+            res.assignPermissions(permissionsArr, function (err2, newRole) {
+              should.not.exist(err2);
+              newRole.permissions.should.have.length(permissionsArr.length - 1);
+              Role.findOne({ name: 'root' }, function (err, root) {
+                should.not.exist(err);
+                root.should.have.property('permissions');
+                root.permissions.should.have.length(permissionsArr.length - 1);
+                done();
+              });
+            });
+          });
+        });
+      });
 
     });
 
-    it('should be able to give multiple permssions at the same time', function (done) {
+    describe('Revoke permission to role', function () {
+      it('should be able to revoke permssion to a role', function (done) {
+        var permissionsArr = ['Admin.Role.Test', 'Manager.Role.Test', 'Default.Role.Test'];
+        role.save(function (err, res) {
+          should.not.exist(err);
+          should.exist(res);
+          res.assignPermissions(permissionsArr, function (err2, newRole) {
+            should.not.exist(err2);
+            should.exist(newRole);
+            newRole.revokePermission('Default.Role.Test', function (err, role) {
+              should.not.exist(err);
+              should.exist(role);
+              role.permissions.should.have.length(permissionsArr.length - 1);
+              role.permissions.indexOf('Default.Role.Test').should.equal(-1);
+              done();
+            });
+          });
+        });
+      });
 
-    });
+      it('should be able to revoke multiple permssions to a role', function (done) {
+        var permissionsArr = ['Admin.Role.Test', 'Manager.Role.Test', 'Default.Role.Test'];
+        var toBeRevoked = ['Manager.Role.Test', 'Default.Role.Test'];
 
-    it('should give all permission to root user by default', function (done) {
+        role.save(function (err, res) {
+          should.not.exist(err);
+          should.exist(res);
+          res.assignPermissions(permissionsArr, function (err2, newRole) {
+            should.not.exist(err2);
+            should.exist(newRole);
+            newRole.revokePermissions(toBeRevoked, function (err, role) {
+              should.not.exist(err);
+              should.exist(role);
+              role.permissions.should.have.length(1);
+              role.permissions.indexOf('Default.Role.Test').should.equal(-1);
+              role.permissions.indexOf('Manager.Role.Test').should.equal(-1);
+              done();
+            });
+          });
+        });
+      });
 
-    });
+      it('should not revoke a permission that a role does not have', function (done) {
+        var permissionsArr = ['Admin.Role.Test', 'Manager.Role.Test', 'Default.Role.Test'];
+        var toBeRevoked = ['Test.Role.Test', 'Manager.Role.Test'];
 
-    it('should be able to revoke permssion to a role', function (done) {
+        role.save(function (err, res) {
+          should.not.exist(err);
+          should.exist(res);
+          res.assignPermissions(permissionsArr, function (err2, newRole) {
+            should.not.exist(err2);
+            should.exist(newRole);
+            newRole.revokePermissions(toBeRevoked, function (err, role, warnings) {
+              should.not.exist(err);
+              warnings.should.have.length(1);
+              should.exist(role);
+              role.permissions.should.have.length(2);
+              role.permissions.indexOf('Manager.Role.Test').should.equal(-1);
+              done();
+            });
+          });
+        });
 
-    });
-
-    it('should be able to revoke multiple permssions to a role', function (done) {
-
-    });
-
-    it('should not revoke a permission that a role does not have', function (done) {
-
+      });
     });
 
   });
