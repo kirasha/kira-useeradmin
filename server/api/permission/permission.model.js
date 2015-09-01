@@ -22,10 +22,6 @@ var PermissionSchema = new Schema({
   }
 });
 
-PermissionSchema.statics.findOrCreate = function (name, callback) {
-  var schema = this;
-};
-
 PermissionSchema.plugin(uniqueValiator);
 PermissionSchema.plugin(findOrCreate);
 

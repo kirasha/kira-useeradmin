@@ -64,10 +64,10 @@ exports.e2eTests = function (done) {
   return e2eTestServer(done);
 };
 
-exports.watchTests = function () {
+exports.watchTests = function (done) {
   // run test when file change
   gulp.watch(['server/**/*.js'], function () {
-    testServer();
+    return testServer();
   });
-  return testServer();
+  return testServer(done);
 };

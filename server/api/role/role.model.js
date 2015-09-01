@@ -31,14 +31,10 @@ var RoleSchema  = new Schema({
 RoleSchema.plugin(uniqueValiator);
 RoleSchema.plugin(findOrCreate);
 
-function getRoleModel () {
-  return mongoose.model('Role', RoleSchema);
-}
-
 RoleSchema.methods.assignPermissions = function (permissions, callback) {
   var role, schema = this;
 
-  async.forEachOfSeries(permissions, function iterator (permission, index, cb) {
+  async.eachSeries(permissions, function iterator (permission, cb) {
     schema.assignPermission(permission, function (err, newRole) {
       role = newRole;
       cb(err);
@@ -50,20 +46,24 @@ RoleSchema.methods.assignPermissions = function (permissions, callback) {
 
 RoleSchema.methods.assignPermission = function (permission, callback) {
   var schema = this;
-  Permission.findOrCreate({ name: permission }, function (err, res, isNew) {
-    if (schema.permissions.indexOf(res._id) === -1) {
+  Permission.findOrCreate({ name: permission }, function (err, res) {
+    if (!err && schema.permissions.indexOf(res._id) === -1) {
       schema.permissions.push(res._id);
       schema.save(function (err) {
         // update root role as well
+        if (err) {
+          callback(err, schema);
+          return;
+        }
         var rootRole = {
           name: 'root',
           description: 'Root role with all permissions',
           builtIn: true,
           active: true
         };
-        schema.constructor.findOrCreate({ name: 'root' }, rootRole, function (err, root, isNew) {
+        schema.constructor.findOrCreate({ name: 'root' }, rootRole, function (err, root) {
           if (!err && root) {
-            if (root.permissions.indexOf(res._id) == -1) {
+            if (root.permissions.indexOf(res._id) === -1) {
               root.permissions.push(res._id);
               root.save(function (err) {
                 callback(err, schema);
@@ -90,7 +90,7 @@ RoleSchema.methods.revokePermission = function (permissionName, callback) {
       if (!err && permission) {
         var index = schema.permissions.indexOf(permission.id);
 
-        if (index != -1) {
+        if (index !== -1) {
           schema.permissions.splice(index, 1);
           schema.save(function (err, res) {
             return callback(err, res);
@@ -110,7 +110,7 @@ RoleSchema.methods.revokePermissions = function (permissions, callback) {
       warnings = [],
       schema = this;
 
-  async.forEachOfSeries(permissions, function iterator (permission, index, cb) {
+  async.eachSeries(permissions, function iterator (permission, cb) {
     schema.revokePermission(permission, function (err, newRole, warning) {
       role = newRole;
       if (warning) {
