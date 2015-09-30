@@ -12,7 +12,6 @@ describe('Permissions API', function () {
   });
 
   after(function (done) {
-    // server.close(done);
     TestHelper.clean(Permission, done);
   });
 

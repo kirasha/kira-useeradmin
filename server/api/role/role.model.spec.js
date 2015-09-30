@@ -93,6 +93,85 @@ describe('Role Model', function () {
         done();
       });
     });
+
+  });
+
+  describe('Default role', function () {
+
+    function countDefaultRole (roles) {
+      var defaultCount = 0;
+      roles.forEach(function (role) {
+        if (role.default) {
+          defaultCount++;
+        }
+      });
+      return defaultCount;
+    }
+
+    it('it should set a default role', function (done) {
+      role.save(function (err, savedRole) {
+        should.not.exist(err);
+        should.exist(savedRole);
+        Role.setDefaultRole(savedRole.name, function (err, updatedRole) {
+          should.not.exist(err);
+          should.exist(updatedRole);
+          updatedRole.default.should.equal(true);
+          done();
+        });
+      });
+    });
+
+    it('role should have only one default role', function (done) {
+      var testRole = createRole('User', 'Regular user');
+
+      role.save(function (err, role1) {
+        should.not.exist(err);
+        should.exist(role1);
+        role1.should.have.property('default');
+        role1.default.should.equal(false);
+        Role.setDefaultRole(role1.name, function (err, role2) {
+          should.not.exist(err);
+          should.exist(role2);
+          role2.default.should.equal(true);
+          testRole.save(function (err, role3) {
+            should.not.exist(err);
+            should.exist(role3);
+            role3.default.should.equal(false);
+            Role.setDefaultRole(role3.name, function (err, role4) {
+              should.not.exist(err);
+              should.exist(role4);
+              role4.default.should.equal(true);
+
+              Role.find({}, function (err, roles) {
+                should.not.exist(err);
+                should.exist(roles);
+                roles.should.have.length(2);
+                countDefaultRole(roles).should.equal(1);
+                done();
+              });
+            });
+          });
+        });
+      });
+    });
+
+    it('should return the default role', function (done) {
+      role.save(function (err, savedRole) {
+        should.not.exist(err);
+        should.exist(savedRole);
+        Role.setDefaultRole(savedRole.name, function (err, updatedRole) {
+          should.not.exist(err);
+          should.exist(updatedRole);
+          updatedRole.default.should.equal(true);
+          Role.getDefaultRole(function (err, defaultRole) {
+            should.not.exist(err);
+            should.exist(defaultRole);
+            defaultRole.default.should.equal(true);
+            done();
+          });
+        });
+      });
+    });
   });
 
   describe('Assign Permission to role', function () {
@@ -118,6 +197,7 @@ describe('Role Model', function () {
         should.exist(res);
         res.assignPermission('Admin.Role.Test', function (err2, newRole) {
           should.not.exist(err2);
+          should.exist(newRole);
           Permission.find({}, function (err, permissions) {
             should.not.exist(err);
             should.exist(permissions);

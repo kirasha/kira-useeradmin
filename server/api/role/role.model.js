@@ -23,6 +23,10 @@ var RoleSchema  = new Schema({
     type: Boolean,
     default: true
   },
+  default: {
+    type: Boolean,
+    default: false
+  },
   permissions: [{
     type: Schema.Types.ObjectId, ref: 'Permission'
   }]
@@ -61,7 +65,7 @@ RoleSchema.methods.assignPermission = function (permission, callback) {
           builtIn: true,
           active: true
         };
-        schema.constructor.findOrCreate({ name: 'root' }, rootRole, function (err, root) {
+        schema.constructor.findOrCreate({ name: rootRole.name }, rootRole, function (err, root) {
           if (!err && root) {
             if (root.permissions.indexOf(res._id) === -1) {
               root.permissions.push(res._id);
@@ -121,6 +125,34 @@ RoleSchema.methods.revokePermissions = function (permissions, callback) {
     });
   }, function (err) {
     callback(err, role, warnings);
+  });
+};
+
+RoleSchema.statics.setDefaultRole = function (roleName, callback) {
+
+  var model = this;
+
+  model.update({}, { default: false }, function (err, count) {
+    if (err || !count) {
+      callback(err);
+    }
+    model.findOneAndUpdate({ name: roleName }, { default: true }, function (err, doc) {
+      if (err) {
+        callback(err, doc);
+        return;
+      }
+      model.findOne({ name: roleName }, function (err, role) {
+        callback(err, role);
+      });
+    });
+  });
+};
+
+RoleSchema.statics.getDefaultRole = function (callback) {
+  var model = this;
+
+  model.findOne({ default: true }, function (err, doc) {
+    callback(err, doc);
   });
 };
 

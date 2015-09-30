@@ -2,6 +2,7 @@
 
 var should      = require('should'),
     TestHelper  = require('../../lib/testHelper'),
+    Role        = require('../role/role.model'),
     User        = require('./user.model');
 
 var user;
@@ -29,6 +30,7 @@ describe('User Model', function () {
 
   afterEach(function (done) {
     TestHelper.clean(User, done);
+    TestHelper.clean(Role, done);
   });
 
   it('should begin with no users', function (done) {
@@ -44,6 +46,34 @@ describe('User Model', function () {
       should.not.exist(err);
       should.exist(user);
       done();
+    });
+  });
+
+  it('should save a user and set a default role', function (done) {
+    var role = new Role({
+        name: 'tester',
+        description: 'Description of this role',
+        builtIn: true,
+        default: true,
+        active: true
+      });
+
+    role.save(function (err, savedRole) {
+      user.save(function (err, savedUser) {
+        should.not.exist(err);
+        should.exist(savedUser);
+        savedUser.should.have.property('role');
+        User.findOne({ _id: savedUser.id })
+            .populate('role')
+            .exec(function (err, userRole) {
+              should.not.exist(err);
+              should.exist(userRole);
+              userRole.should.have.property('role');
+              userRole.role.should.be.ok();
+              userRole.role.name.should.equal(role.name);
+              done();
+            });
+      });
     });
   });
 

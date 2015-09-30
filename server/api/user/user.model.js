@@ -2,6 +2,7 @@
 
 var mongoose  = require('mongoose'),
     crypto    = require('crypto'),
+    Role      = require('../role/role.model'),
     Schema    =  mongoose.Schema;
 
 var UserSchema = new Schema({
@@ -36,6 +37,10 @@ var UserSchema = new Schema({
   },
   providerId: String,
   providerData: {},
+  role: {
+    type: Schema.Types.ObjectId,
+    ref: 'Role'
+  },
   created: {
     type: Date,
     default: Date.now
@@ -54,13 +59,25 @@ UserSchema.virtual('fullName')
     this.lastName = splitName[1] || '';
   });
 
-// hooks
 UserSchema.pre('save', function (next) {
   if (this.password) {
     this.salt = new Buffer(crypto.randomBytes(16).toString('base64'),'base64');
     this.password = this.hashPassword(this.password);
   }
-  next();
+
+  // assign default role if no role was provided
+  var user = this;
+  if (!user.role) {
+    Role.getDefaultRole(function (err, role) {
+      if (!err && role) {
+        user.role = role._id;
+      }
+      next();
+    });
+  } else {
+    next();
+  }
+
 });
 
 // methods
