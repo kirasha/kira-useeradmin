@@ -1,0 +1,21 @@
+[
+  {
+    "name": "root",
+    "description": "Root User with All permissions",
+    "builtIn": true,
+    "active": true
+  },
+  {
+    "name": "Administrator",
+    "description": "Administrator of the application",
+    "builtIn": false,
+    "active": false
+  },
+  {
+    "name": "Authenticated User",
+    "description": "Administrator of the application",
+    "builtIn": false,
+    "active": false,
+    "default": true
+  }
+]

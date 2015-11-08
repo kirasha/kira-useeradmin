@@ -3,6 +3,8 @@
  * Tests
  */
 
+process.env.NODE_ENV = 'test';
+
 var gulp    = require('gulp'),
     gutil   = require('gulp-util'),
     mocha   = require('gulp-mocha'),

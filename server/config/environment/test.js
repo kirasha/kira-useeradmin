@@ -7,6 +7,6 @@ module.exports = {
   mongo: {
     uri: 'mongodb://localhost/useradmin-test'
   },
-  populateDB: true,
+  populateDB: false,
   port: 7000
 };

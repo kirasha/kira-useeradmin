@@ -21,6 +21,10 @@ mongoose.connect(config.mongo.uri, config.mongo.options);
 require('./config/express')(app);
 // load routes
 require('./routes')(app);
+// Populate DB with sample data
+if (config.populateDB) {
+  require('./populate');
+}
 
 function startServer () {
   var server = http.createServer(app);

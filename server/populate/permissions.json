@@ -1,0 +1,98 @@
+[
+  {
+    "name": "Useradmin.Users.View",
+    "description": "Ability to View System Users",
+    "builtIn": true,
+    "active": true
+  },
+  {
+    "name": "Useradmin.Users.Create",
+    "description": "Ability to create System Users",
+    "builtIn": true,
+    "active": true
+  },
+  {
+    "name": "Useradmin.Users.Edit",
+    "description": "Ability to edit System Users",
+    "builtIn": true,
+    "active": true
+  },
+  {
+    "name": "Useradmin.Users.Delete",
+    "description": "Ability to delete Users",
+    "builtIn": true,
+    "active": true
+  },
+  {
+    "name": "Useradmin.Users.Disable",
+    "description": "Ability to disable System Users",
+    "builtIn": true,
+    "active": true
+  },
+  {
+    "name": "Useradmin.User.Edit",
+    "description": "Ability to edit own info",
+    "builtIn": true,
+    "active": true
+  },
+  {
+    "name": "Useradmin.User.View",
+    "description": "View own information",
+    "builtIn": true,
+    "active": true
+  },
+  {
+    "name": "Useradmin.Users.AssignRoles",
+    "description": "Ability to assing roles to Users",
+    "builtIn": true,
+    "active": true
+  },
+  {
+    "name": "Useradmin.Users.RevokeRoles",
+    "description": "Ability to edit System Users",
+    "builtIn": true,
+    "active": true
+  },
+  {
+    "name": "Useradmin.Roles.View",
+    "description": "Ability to view System roles",
+    "builtIn": true,
+    "active": true
+  },
+  {
+    "name": "Useradmin.Roles.Create",
+    "description": "Ability to create roles",
+    "builtIn": true,
+    "active": true
+  },
+  {
+    "name": "Useradmin.Roles.Edit",
+    "description": "Ability to edit roles",
+    "builtIn": true,
+    "active": true
+  },
+  {
+    "name": "Useradmin.Roles.Delete",
+    "description": "Ability to delete roles",
+    "builtIn": true,
+    "active": true
+  },
+  {
+    "name": "Useradmin.Permissions.View",
+    "description": "Ability to view Permissions",
+    "builtIn": true,
+    "active": true
+  },
+  {
+    "name": "Useradmin.Permissions.Edit",
+    "description": "Ability to edit permissions",
+    "builtIn": true,
+    "active": true
+  },
+  {
+    "name": "Useradmin.Permissions.Create",
+    "description": "Ability to create permissions",
+    "builtIn": true,
+    "active": true
+  }
+]

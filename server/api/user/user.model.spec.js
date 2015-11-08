@@ -60,6 +60,8 @@ describe('User Model', function () {
         });
 
       role.save(function (err, savedRole) {
+        should.not.exist(err);
+        should.exist(savedRole);
         user.save(function (err, savedUser) {
           should.not.exist(err);
           should.exist(savedUser);
