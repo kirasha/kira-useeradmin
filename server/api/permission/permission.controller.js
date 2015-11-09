@@ -1,12 +1,12 @@
 'use strict';
 
-var Permission = require('./permission.model.js');
+var Permission      = require('./permission.model.js');
 
 /*
  */
 
 exports.index = function (req, res) {
-  Permission.find({}, function (err, permissions) {
+  Permission.filter(req.restQuery, function (err, permissions) {
     if (err) {
       res.respond(err, '500');
     } else {

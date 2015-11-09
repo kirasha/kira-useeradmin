@@ -3,6 +3,7 @@
 var mongoose        = require('mongoose'),
     uniqueValiator  = require('mongoose-unique-validator'),
     findOrCreate    = require('mongoose-findorcreate'),
+    filter          = require('mongoose-filter'),
     Schema          = mongoose.Schema;
 
 var PermissionSchema = new Schema({
@@ -24,5 +25,12 @@ var PermissionSchema = new Schema({
 
 PermissionSchema.plugin(uniqueValiator);
 PermissionSchema.plugin(findOrCreate);
+PermissionSchema.plugin(filter);
+
+PermissionSchema.set('toJSON', {
+  transform: function (doc, ret, options) {
+    delete ret.__v;
+  }
+});
 
 module.exports = mongoose.model('Permission', PermissionSchema);

@@ -6,6 +6,7 @@
     "afterEach": true,
     "after": true,
     "before": true,
-    "beforeEach": true
+    "beforeEach": true,
+    "Promise": true
   }
 }

@@ -104,7 +104,9 @@ describe('Permission Model', function () {
 
             var newPermission = createPermission('Test.Permission');
             var permissionObj = newPermission.toJSON();
-            Permission.findOrCreate({ name: newPermission.name }, permissionObj, function (err, permissionCreated, created) {
+            Permission.findOrCreate({ name: newPermission.name },
+                                    permissionObj,
+                                    function (err, permissionCreated, created) {
               should.not.exist(err);
               should.exist(permission);
               created.should.equal(true);
@@ -120,6 +122,11 @@ describe('Permission Model', function () {
       });
     });
 
+    it('Should have filter function', function (done) {
+      Permission.should.be.an.instanceOf(Object).and.have.property('filter');
+      'function'.should.equal(typeof (Permission.filter));
+      done();
+    });
   });
 
 });

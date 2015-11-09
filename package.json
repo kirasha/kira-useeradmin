@@ -14,7 +14,9 @@
     "method-override": "^2.3.5",
     "mongoose": "^4.1.0",
     "mongoose-findorcreate": "^0.1.2",
-    "mongoose-unique-validator": "^0.4.1"
+    "mongoose-unique-validator": "^0.4.1",
+    "mongoose-filter":"kirasha/mongoose-filter",
+    "rest-query-parser":"kirasha/rest-query-parser"
   },
   "devDependencies": {
     "async": "^1.4.0",

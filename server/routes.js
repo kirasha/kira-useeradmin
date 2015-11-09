@@ -1,7 +1,8 @@
 'use strict';
 
-var fs = require('fs'),
-    config = require('./config/environment');
+var fs              = require('fs'),
+    restQueryParser = require('rest-query-parser'),
+    config          = require('./config/environment');
 
 module.exports = function (app) {
 
@@ -21,6 +22,8 @@ module.exports = function (app) {
     req.needJSON = true;
     next();
   });
+
+  app.use('/api/*', restQueryParser());
 
   // automatically load api modules
   var modules = fs.readdirSync(config.root + '/server/api/');
