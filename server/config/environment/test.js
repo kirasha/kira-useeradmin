@@ -8,5 +8,9 @@ module.exports = {
     uri: 'mongodb://localhost/useradmin-test'
   },
   populateDB: false,
-  port: 7000
+  port: 7000,
+  site: {
+    base_url: 'http://localhost:9000/',
+    api_url: 'http://localhost:9000/api/'
+  }
 };

@@ -16,6 +16,8 @@ server = http.createServer(app);
 
 // connect to database
 mongoose.connect(config.mongo.uri, config.mongo.options);
+// use native promises
+mongoose.Promise = global.Promise;
 
 // load express configuration
 require('./config/express')(app);

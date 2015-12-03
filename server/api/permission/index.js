@@ -1,10 +1,15 @@
 'use strict';
 
-var controller = require('./permission.controller');
+var Controller = require('./permission.controller');
 
 module.exports = function (app) {
   // match /api/permissions or /permissions
   app.route('(/api)?/permissions')
-      .get(controller.index)
-      .post(controller.create);
+      .get(Controller.index)
+      .post(Controller.create);
+
+  app.route('(/api)?/permissions/:id')
+      .get(Controller.show)
+      .put(Controller.update);
+
 };

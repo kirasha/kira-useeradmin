@@ -19,5 +19,10 @@ module.exports = {
             process.env.MONGOHQ_URL ||
             process.env.OPENSHIFT_MONGODB_DB_URL + process.env.OPENSHIFT_APP_NAME ||
             'mongodb://localhost/meancommentor'
+  },
+
+  site: {
+    base_url: 'http://localhost:9000',
+    api_url: 'http://localhost:9000/api/'
   }
 };

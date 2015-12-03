@@ -6,8 +6,12 @@ var permissions = require('./permissions.json');
 
 console.log('Starting populating...');
 
-permissions.forEach(function (permissionObj) {
-  var permission = new Permission(permissionObj);
-  permission.save();
+Permission.remove({}).then(function () {
+  permissions.forEach(function (permissionObj) {
+    var permission = new Permission(permissionObj);
+    permission.save(function (err, saved) {
+      console.log(saved);
+    });
+  });
 });
 

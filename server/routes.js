@@ -2,20 +2,12 @@
 
 var fs              = require('fs'),
     restQueryParser = require('rest-query-parser'),
+    middleware    = require('./lib/middleware'),
     config          = require('./config/environment');
 
 module.exports = function (app) {
 
-  app.use(function (req, res, next) {
-    res.respond = function (data, file) {
-      if (req.needJSON) {
-        res.json(data);
-      } else {
-        res.render(file, data);
-      }
-    };
-    next();
-  });
+  app.use(middleware.extendResponse);
 
   // respond with JSON to all /api request
   app.all('/api/*', function (req, res, next) {

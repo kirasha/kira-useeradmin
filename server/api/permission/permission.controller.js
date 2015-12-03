@@ -1,32 +1,20 @@
 'use strict';
 
-var Permission      = require('./permission.model.js');
+var Permission      = require('./permission.model'),
+    CRUDController  = require('../../lib/controllers/CRUDController')(Permission),
+    restUtils       = require('../../lib/restUtils.js'),
+    formatter       = require('../../lib/restFormatter');
 
 /*
  */
 
-exports.index = function (req, res) {
-  Permission.filter(req.restQuery, function (err, permissions) {
-    if (err) {
-      res.respond(err, '500');
-    } else {
-      res.respond(permissions, 'index');
-    }
-  });
-};
-
+exports.index = CRUDController.list();
 /*
  * Create a new Permission
  */
 
-exports.create = function (req, res) {
-  var permission = new Permission(req.body);
+exports.create = CRUDController.create();
 
-  permission.save(function (err, permission) {
-    if (err) {
-      res.respond(err, '500');
-    } else {
-      res.respond(permission, 'permission');
-    }
-  });
-};
+exports.show = CRUDController.read();
+
+exports.update = CRUDController.update();

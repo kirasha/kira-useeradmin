@@ -68,7 +68,7 @@ describe('Permissions API', function () {
   });
 
   it('should paginate results', function (done) {
-    generatePermissions(15).then(function (savedPermissions) {
+    generatePermissions(15).then(function () {
       request(app)
         .get('/api/permissions?page=2&size=10')
         .expect(200)

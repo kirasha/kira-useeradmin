@@ -10,5 +10,9 @@ module.exports = {
 
   ip: '127.0.0.1',
 
-  populateDB: true
+  populateDB: true,
+  site: {
+    base_url: 'http://localhost:9000',
+    api_url: 'http://localhost:9000/api/'
+  }
 };
