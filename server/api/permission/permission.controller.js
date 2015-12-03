@@ -1,9 +1,7 @@
 'use strict';
 
 var Permission      = require('./permission.model'),
-    CRUDController  = require('../../lib/controllers/CRUDController')(Permission),
-    restUtils       = require('../../lib/restUtils.js'),
-    formatter       = require('../../lib/restFormatter');
+    CRUDController  = require('../../lib/controllers/CRUDController')(Permission);
 
 /*
  */

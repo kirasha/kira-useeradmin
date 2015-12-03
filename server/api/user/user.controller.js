@@ -1,28 +1,15 @@
 'use strict';
 
-var User = require('./user.model');
+var User            = require('./user.model'),
+    CRUDController  = require('../../lib/controllers/CRUDController')(User);
 
-exports.index = function (req, res) {
-  User.find({}, function (err, users) {
-    if (err) {
-      return res.respond(err, '500');
-    }
-    res.respond(users, 'index');
-  });
-};
+exports.index = CRUDController.list();
 
 /*
  * Create a new user
  */
-exports.create = function (req, res) {
-  var user = new User(req.body);
+exports.create = CRUDController.create();
 
-  user.save(function (err, user) {
-    if (err) {
-      res.respond(err, '404');
-    } else {
-      res.respond(user, 'user');
-    }
+exports.show = CRUDController.read();
 
-  });
-};
+exports.update = CRUDController.update();

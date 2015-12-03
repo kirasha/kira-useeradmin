@@ -2,6 +2,8 @@
 
 var mongoose  = require('mongoose'),
     crypto    = require('crypto'),
+    filter          = require('mongoose-filter'),
+    timeStamps      = require('mongoose-timestamp'),
     Role      = require('../role/role.model'),
     Schema    =  mongoose.Schema;
 
@@ -113,5 +115,8 @@ UserSchema.set('toJSON', {
   getters: true,
   virtuals: true
 });
+
+UserSchema.plugin(filter);
+UserSchema.plugin(timeStamps);
 
 module.exports = mongoose.model('User', UserSchema);

@@ -3,6 +3,8 @@
 var mongoose        = require('mongoose'),
     uniqueValiator  = require('mongoose-unique-validator'),
     findOrCreate    = require('mongoose-findorcreate'),
+    filter          = require('mongoose-filter'),
+    timeStamps      = require('mongoose-timestamp'),
     async           = require('async'),
     Schema          = mongoose.Schema;
 
@@ -31,9 +33,6 @@ var RoleSchema  = new Schema({
     type: Schema.Types.ObjectId, ref: 'Permission'
   }]
 });
-
-RoleSchema.plugin(uniqueValiator);
-RoleSchema.plugin(findOrCreate);
 
 RoleSchema.methods.assignPermissions = function (permissions, callback) {
   var role, schema = this;
@@ -155,5 +154,15 @@ RoleSchema.statics.getDefaultRole = function (callback) {
     callback(err, doc);
   });
 };
+
+RoleSchema.plugin(filter);
+RoleSchema.plugin(timeStamps);
+RoleSchema.plugin(uniqueValiator);
+RoleSchema.plugin(findOrCreate);
+
+RoleSchema.set('toJSON', {
+  getters: true,
+  virtuals: true
+});
 
 module.exports = mongoose.model('Role', RoleSchema);

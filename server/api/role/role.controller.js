@@ -1,32 +1,18 @@
 'use strict';
 
-var Role = require('./role.model.js');
+var Role            = require('./role.model.js'),
+    CRUDController  = require('../../lib/controllers/CRUDController')(Role);
 
 /*
  * Find all roles
  */
-exports.index = function (req, res) {
-  Role.find({}, function (err, roles) {
-    if (err) {
-      res.respond(err, '500');
-    } else {
-      res.respond(roles, 'index');
-    }
-
-  });
-};
+exports.index = CRUDController.list();
 
 /*
  * Creates a new role
  */
-exports.create = function (req, res) {
-  var role = new Role(req.body);
+exports.create = CRUDController.create();
 
-  role.save(function (err, role) {
-    if (err) {
-      res.respond(err, '500');
-    } else {
-      res.respond(role, 'role');
-    }
-  });
-};
+exports.show = CRUDController.read();
+
+exports.update = CRUDController.update();
