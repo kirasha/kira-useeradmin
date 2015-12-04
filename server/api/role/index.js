@@ -8,4 +8,8 @@ module.exports = function (app) {
       .get(controller.index)
       .post(controller.create);
 
+  app.route('(/api)?/roles/:id')
+  .get(controller.show)
+  .put(controller.update);
+
 };

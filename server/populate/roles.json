@@ -9,13 +9,23 @@
     "name": "Administrator",
     "description": "Administrator of the application",
     "builtIn": false,
-    "active": false
+    "active": false,
+    "permissions": ["Useradmin.Users.View,","Useradmin.Users.Create","Useradmin.Users.Delete",
+      "Useradmin.Users.Disable","Useradmin.User.Edit","Useradmin.User.View","Useradmin.Users.AssignRoles",
+      "Useradmin.Users.RevokeRoles","Useradmin.Roles.View","Useradmin.Roles.Create","Useradmin.Permissions.Create",
+      "Useradmin.Permissions.Edit","Useradmin.Roles.Delete"
+    ]
   },
   {
     "name": "Authenticated User",
     "description": "Administrator of the application",
     "builtIn": false,
     "active": false,
-    "default": true
+    "default": true,
+    "permissions":["Useradmin.Users.View,","Useradmin.User.Edit","Useradmin.User.View","Useradmin.Users.AssignRoles",
+      "Useradmin.Users.RevokeRoles","Useradmin.Roles.View","Useradmin.Permissions.View",
+      "Useradmin.Permission.View","Useradmin.Role.View"
+    ]
+
   }
 ]

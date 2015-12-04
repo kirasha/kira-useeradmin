@@ -101,9 +101,11 @@ describe('Permissions API', function () {
       });
   });
 
+  /*
   it('should be able to update permissions on PUT /api/permissions', function (done) {
     done();
   });
+  //*/
 
 });
 

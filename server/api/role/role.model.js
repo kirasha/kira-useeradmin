@@ -5,6 +5,7 @@ var mongoose        = require('mongoose'),
     findOrCreate    = require('mongoose-findorcreate'),
     filter          = require('mongoose-filter'),
     timeStamps      = require('mongoose-timestamp'),
+    config          = require('../../config/environment'),
     async           = require('async'),
     Schema          = mongoose.Schema;
 
@@ -32,6 +33,10 @@ var RoleSchema  = new Schema({
   permissions: [{
     type: Schema.Types.ObjectId, ref: 'Permission'
   }]
+});
+
+RoleSchema.virtual('href').get(function () {
+  return config.site.api_url + 'roles/' + this._id;
 });
 
 RoleSchema.methods.assignPermissions = function (permissions, callback) {
