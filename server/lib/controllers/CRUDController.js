@@ -1,8 +1,6 @@
 'use strict';
 
 var _               = require('lodash'),
-    RestUtils       = require('../restUtils'),
-    Formatter       = require('../restFormatter'),
     defaultOptions  = {};
 
 defaultOptions.omitted = ['_id', '__v'].concat(Object.keys(require('mongoose').Schema.reserved));

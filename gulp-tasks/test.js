@@ -49,6 +49,7 @@ function testServer (done) {
 
 function e2eTestServer (done) {
   async.series([
+    runTests('server/lib/*/*.spec.js', 'CRUD Controller Spec'),
     runTests('server/**/*.api.spec.js', 'Running Server API Spec')
   ], done);
 }
