@@ -8,6 +8,7 @@ var express   = require('express'),
     http      = require('http'),
     mongoose  = require('mongoose'),
     config    = require('./config/environment'),
+    populate  = require('./populate'),
     app,
     server;
 
@@ -25,7 +26,7 @@ require('./config/express')(app);
 require('./routes')(app);
 // Populate DB with sample data
 if (config.populateDB) {
-  require('./populate');
+  populate();
 }
 
 function startServer () {

@@ -107,13 +107,12 @@ describe('CRUD Controller', function () {
           res.body.should.be.instanceof(Object);
           res.body.should.have.properties(Object.keys(doc));
           res.body.id.should.equal(doc.id);
-          console.log(res.body);
           done(err);
         });
     });
   });
 
-  /* describe('POST', function () {
+  describe('POST', function () {
     it('POST should create a role and return it', function (done) {
 
       var role = createRole({ name: 'Role 1', builtIn: false });
@@ -129,6 +128,6 @@ describe('CRUD Controller', function () {
           done(err);
         });
     });
-  }); */
+  });
 
 });
