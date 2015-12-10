@@ -33,6 +33,11 @@ function sendData (data, options) {
     return;
   }
 
+  // pagination header links
+  if (options && options.links && typeof options.links === 'object') {
+    res.links(options.links);
+  }
+
   // If appropriate, serve data as JSON
   if (req.needsJSON || req.xhr || req.accepts('application/json')) {
     return res.json(data);

@@ -97,6 +97,34 @@ describe('CRUD Controller', function () {
         });
     });
 
+    it('should always return default properties', function (done) {
+      var defaultFields = ['id','name','createdAt', 'updatedAt','href'];
+      request(app)
+        .get(apiRoute)
+        .expect(200)
+        .expect('Content-type', /json/)
+        .end(function (err, res) {
+          should.not.exist(err);
+          var role = res.body[0];
+          role.should.have.properties(defaultFields);
+          done(err);
+        });
+    });
+
+    it('should paginate results and return correct headers', function (done) {
+      request(app)
+      .get(apiRoute + '?page=1&size=1')
+        .expect(200)
+        .expect('Content-type', /json/)
+        .expect('Link', '</api/test/crud?page=2&size=1>; rel="next", </api/test/crud?page=3&size=1>; rel="last"')
+        .end(function (err, res) {
+          should.not.exist(err);
+          res.body.should.be.instanceof(Array);
+          res.body.length.should.equal(1);
+          done();
+        });
+    });
+
     it('should return a document when given its id', function (done) {
       request(app)
         .get(apiRoute + '/' + doc.id)
