@@ -42,9 +42,10 @@ function formatLinks (all, pagination, originalUrl) {
 
   var lastPage = Math.ceil(all / pagination.size);
   var pagingMetaData = {};
-  // can have next
-  if (pagination.page < lastPage) {
-    pagingMetaData.next = builPaginationUrl(pagination.page + 1, originalUrl);
+
+  // can have first
+  if (pagination.page > 1) {
+    pagingMetaData.first = builPaginationUrl(1, originalUrl);
   }
 
   // can have previous
@@ -52,13 +53,13 @@ function formatLinks (all, pagination, originalUrl) {
     pagingMetaData.previous = builPaginationUrl(pagination.page - 1, originalUrl);
   }
 
-  // can have first
-  if (pagination.page - 1 > 1) {
-    pagingMetaData.first = builPaginationUrl(1, originalUrl);
+  // can have next
+  if (pagination.page < lastPage) {
+    pagingMetaData.next = builPaginationUrl(pagination.page + 1, originalUrl);
   }
 
   // can have last
-  if (pagination.page + 1 < lastPage) {
+  if (pagination.page  < lastPage) {
     pagingMetaData.last = builPaginationUrl(lastPage, originalUrl);
   }
 

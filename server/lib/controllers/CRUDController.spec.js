@@ -111,20 +111,6 @@ describe('CRUD Controller', function () {
         });
     });
 
-    it('should paginate results and return correct headers', function (done) {
-      request(app)
-      .get(apiRoute + '?page=1&size=1')
-        .expect(200)
-        .expect('Content-type', /json/)
-        .expect('Link', '</api/test/crud?page=2&size=1>; rel="next", </api/test/crud?page=3&size=1>; rel="last"')
-        .end(function (err, res) {
-          should.not.exist(err);
-          res.body.should.be.instanceof(Array);
-          res.body.length.should.equal(1);
-          done();
-        });
-    });
-
     it('should return a document when given its id', function (done) {
       request(app)
         .get(apiRoute + '/' + doc.id)
@@ -137,6 +123,65 @@ describe('CRUD Controller', function () {
           res.body.id.should.equal(doc.id);
           done(err);
         });
+    });
+
+    describe('Pagination', function () {
+      it('should return only next and last link headers', function (done) {
+        request(app)
+        .get(apiRoute + '?page=1&size=1')
+          .expect(200)
+          .expect('Content-type', /json/)
+          .expect('Link', '</api/test/crud?page=2&size=1>; rel="next", </api/test/crud?page=5&size=1>; rel="last"')
+          .end(function (err, res) {
+            should.not.exist(err);
+            res.body.should.be.instanceof(Array);
+            res.body.length.should.equal(1);
+            done();
+          });
+      });
+
+      it('should return first, previous, next, last link headers', function (done) {
+        request(app)
+        .get(apiRoute + '?page=3&size=1')
+          .expect(200)
+          .expect('Content-type', /json/)
+          .expect('Link', '</api/test/crud?page=1&size=1>; rel="first", </api/test/crud?page=2&size=1>; rel="previous", </api/test/crud?page=4&size=1>; rel="next", </api/test/crud?page=5&size=1>; rel="last"')
+          .end(function (err, res) {
+            should.not.exist(err);
+            res.body.should.be.instanceof(Array);
+            res.body.length.should.equal(1);
+            done();
+          });
+      });
+
+      it('should return firt and previous headers', function (done) {
+        request(app)
+        .get(apiRoute + '?page=5&size=1')
+          .expect(200)
+          .expect('Content-type', /json/)
+          .expect('Link', '</api/test/crud?page=1&size=1>; rel="first", </api/test/crud?page=4&size=1>; rel="previous"')
+          .end(function (err, res) {
+            should.not.exist(err);
+            res.body.should.be.instanceof(Array);
+            res.body.length.should.equal(1);
+            done();
+          });
+      });
+
+      it('should return sane defaults', function (done) {
+        request(app)
+        .get(apiRoute + '?size=2')
+          .expect(200)
+          .expect('Content-type', /json/)
+          .expect('Link', '</api/test/crud?size=2&page=2>; rel="next", </api/test/crud?size=2&page=3>; rel="last"')
+          .end(function (err, res) {
+            should.not.exist(err);
+            res.body.should.be.instanceof(Array);
+            res.body.length.should.equal(2);
+            done();
+          });
+      });
+
     });
   });
 

@@ -27,5 +27,24 @@
       "Useradmin.Permission.View","Useradmin.Role.View"
     ]
 
+  },
+  {
+    "name": "Moderator",
+    "description": "Site Moderator",
+    "builtIn": false,
+    "active": false,
+    "default": true,
+    "permissions":["Useradmin.Users.Edit,","Useradmin.User.Block","Useradmin.User.LockAccount","Useradmin.Users.AssignRoles",
+      "Useradmin.Users.RevokeRoles","Useradmin.Roles.View","Useradmin.Permissions.Add",
+      "Useradmin.Permission.Edit","Useradmin.Role.Delete"
+    ]
+
+  },
+  {
+    "name": "Anonymous",
+    "description": "Anonymous visitor",
+    "builtIn": false,
+    "active": false,
+    "default": true
   }
 ]
