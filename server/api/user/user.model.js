@@ -1,11 +1,12 @@
 'use strict';
 
-var mongoose  = require('mongoose'),
-    crypto    = require('crypto'),
+var mongoose        = require('mongoose'),
+    crypto          = require('crypto'),
     filter          = require('mongoose-filter'),
     timeStamps      = require('mongoose-timestamp'),
-    Role      = require('../role/role.model'),
-    Schema    =  mongoose.Schema;
+    mongooseHidden  = require('mongoose-hidden')(),
+    Role            = require('../role/role.model'),
+    Schema          =  mongoose.Schema;
 
 var UserSchema = new Schema({
   firstName: String,
@@ -118,5 +119,6 @@ UserSchema.set('toJSON', {
 
 UserSchema.plugin(filter);
 UserSchema.plugin(timeStamps);
+UserSchema.plugin(mongooseHidden);
 
 module.exports = mongoose.model('User', UserSchema);

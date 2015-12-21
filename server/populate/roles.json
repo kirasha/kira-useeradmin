@@ -18,7 +18,7 @@
   },
   {
     "name": "Authenticated User",
-    "description": "Administrator of the application",
+    "description": "Any User authenticated in the application",
     "builtIn": false,
     "active": false,
     "default": true,

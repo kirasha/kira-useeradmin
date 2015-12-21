@@ -8,15 +8,40 @@ defaultOptions.omitted = ['_id', '__v'].concat(Object.keys(require('mongoose').S
 
 defaultOptions.fields = ['id','name','createdAt', 'updatedAt','href'];
 
-function removeReservedKeys (entity, callback) {
-  var obj = entity.toJSON();
-  obj = _.omit(obj, defaultOptions.omitted);
-  return obj;
+function getFields (req) {
+  // make a copy instead of a reference to avoid side effects
+  var defaultFields = JSON.parse(JSON.stringify(defaultOptions.fields));
+  return req.restQuery.fields || defaultFields;
 }
 
-function getFields (req) {
-  var fields = req.restQuery.fields || defaultOptions.fields;
-  return fields;
+function defaultEmbed (queryParams) {
+
+  if (queryParams && queryParams.embed) {
+    var tobeEmbeded = queryParams.embed;
+    tobeEmbeded.forEach(function (el) {
+      var field = el.split('.')[0];
+      if (queryParams.fields.indexOf(field) == -1) {
+        queryParams.fields.push(field);
+      }
+    });
+
+    tobeEmbeded = queryParams.embed.sort();
+    // TODO make sure this works for multiple documents to embed
+    tobeEmbeded = tobeEmbeded.map(function (el) {
+      if (el.indexOf('.') === -1) {
+        el = defaultOptions.fields.map(function (field) {
+          return el.trim() + '.' + field.trim();
+        });
+      } else {
+        el.trim();
+      }
+      return el;
+    });
+    tobeEmbeded = _.flatten(tobeEmbeded);
+    queryParams.embed = tobeEmbeded;
+  }
+
+  return queryParams;
 }
 
 function countAll (model, restQuery) {
@@ -28,7 +53,6 @@ function countAll (model, restQuery) {
 }
 
 function builPaginationUrl (pageNumber, originalUrl) {
-  // http://localhost:9000/users?filters=location=='MA'&page=2&size=5
   pageNumber = parseInt(pageNumber, 10) || 1;
   var parsedUrl = urlParser.parse(originalUrl, true);
   parsedUrl.query.page = pageNumber;
@@ -69,7 +93,7 @@ function formatLinks (all, pagination, originalUrl) {
 function list (model, options, callback) {
   return function (req, res, next) {
     req.restQuery.fields = getFields(req);
-    var restQuery = req.restQuery;
+    var restQuery = defaultEmbed(req.restQuery);
     model.filter(restQuery)
       .then(function (docs) {
         if (!docs) {
@@ -77,7 +101,6 @@ function list (model, options, callback) {
         } else {
           countAll(model, restQuery)
           .then(function (allCount) {
-            docs = docs.map(removeReservedKeys);
             var links = formatLinks(allCount, restQuery.pagination, req.originalUrl);
             res.ok(docs, { links: links });
           })
@@ -101,7 +124,7 @@ function read (model, options, callback) {
         if (!doc) {
           res.noContent(doc);
         } else {
-          res.ok(removeReservedKeys(doc));
+          res.ok(doc);
         }
       }
     });
@@ -118,7 +141,7 @@ function create (Model, options, callback) {
         if (!doc) {
           res.noContent(doc);
         } else {
-          res.ok(removeReservedKeys(doc));
+          res.ok(doc);
         }
       }
     });
@@ -135,7 +158,7 @@ function update (model, options, callback) {
         if (!doc) {
           res.notContent(doc);
         } else {
-          res.ok(removeReservedKeys(doc));
+          res.ok(doc);
         }
       }
     });
@@ -151,7 +174,7 @@ function destroy (model, options, callback) {
         if (!doc) {
           res.noContent(doc);
         } else {
-          res.ok(removeReservedKeys(doc));
+          res.ok(doc);
         }
       }
     });

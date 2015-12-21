@@ -5,6 +5,7 @@ var mongoose        = require('mongoose'),
     findOrCreate    = require('mongoose-findorcreate'),
     filter          = require('mongoose-filter'),
     timeStamps      = require('mongoose-timestamp'),
+    mongooseHidden  = require('mongoose-hidden')(),
     config          = require('../../config/environment'),
     async           = require('async'),
     Schema          = mongoose.Schema;
@@ -160,14 +161,15 @@ RoleSchema.statics.getDefaultRole = function (callback) {
   });
 };
 
-RoleSchema.plugin(filter);
-RoleSchema.plugin(timeStamps);
-RoleSchema.plugin(uniqueValiator);
-RoleSchema.plugin(findOrCreate);
-
 RoleSchema.set('toJSON', {
   getters: true,
   virtuals: true
 });
+
+RoleSchema.plugin(filter);
+RoleSchema.plugin(timeStamps);
+RoleSchema.plugin(uniqueValiator);
+RoleSchema.plugin(findOrCreate);
+RoleSchema.plugin(mongooseHidden);
 
 module.exports = mongoose.model('Role', RoleSchema);

@@ -5,6 +5,7 @@ var mongoose        = require('mongoose'),
     findOrCreate    = require('mongoose-findorcreate'),
     timeStamps      = require('mongoose-timestamp'),
     filter          = require('mongoose-filter'),
+    mongooseHidden  = require('mongoose-hidden')(),
     config          = require('../../config/environment'),
     Schema          = mongoose.Schema;
 
@@ -30,14 +31,15 @@ PermissionSchema.virtual('href')
     return config.site.api_url + 'permissions/' + this._id;
   });
 
-PermissionSchema.plugin(uniqueValiator);
-PermissionSchema.plugin(findOrCreate);
-PermissionSchema.plugin(filter);
-PermissionSchema.plugin(timeStamps);
-
 PermissionSchema.set('toJSON', {
   getters: true,
   virtuals: true
 });
+
+PermissionSchema.plugin(uniqueValiator);
+PermissionSchema.plugin(findOrCreate);
+PermissionSchema.plugin(filter);
+PermissionSchema.plugin(timeStamps);
+PermissionSchema.plugin(mongooseHidden);
 
 module.exports = mongoose.model('Permission', PermissionSchema);
