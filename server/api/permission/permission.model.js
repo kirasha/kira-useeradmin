@@ -37,9 +37,9 @@ PermissionSchema.set('toJSON', {
 });
 
 PermissionSchema.plugin(uniqueValiator);
-PermissionSchema.plugin(findOrCreate);
-PermissionSchema.plugin(filter);
 PermissionSchema.plugin(timeStamps);
 PermissionSchema.plugin(mongooseHidden);
+PermissionSchema.plugin(findOrCreate);
+PermissionSchema.plugin(filter);
 
 module.exports = mongoose.model('Permission', PermissionSchema);

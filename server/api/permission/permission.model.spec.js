@@ -110,7 +110,7 @@ describe('Permission Model', function () {
               should.not.exist(err);
               should.exist(permission);
               created.should.equal(true);
-              permissionCreated.should.have.properties(permissionObj);
+              permissionCreated.toJSON().should.have.properties(Object.keys(permissionObj));
               Permission.count({}, function (err, counts) {
                 should.not.exist(err);
                 counts.should.equal(2);
