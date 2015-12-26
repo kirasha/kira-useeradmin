@@ -81,6 +81,22 @@ describe('CRUD Controller', function () {
     return role;
   }
 
+  function getRandomDoc () {
+    return new Promise(function (resolve, reject) {
+      request(app)
+        .get(apiRoute)
+        .end(function (err, res) {
+          if (err) {
+            reject(err);
+            return;
+          }
+          var index = Math.ceil(Math.random() * res.body.length) - 1;
+          var doc = res.body[index];
+          resolve(doc);
+        });
+    });
+  }
+
   describe('GET', function () {
     var doc;
 
@@ -397,20 +413,62 @@ describe('CRUD Controller', function () {
   });
 
   describe('POST', function () {
-    it('should create a role and return it', function (done) {
+    it('should create a document and return it', function (done) {
 
-      var role = createRole({ name: 'Role 1', builtIn: false });
+      var doc = createRole({ name: 'Role 1', builtIn: false });
       request(app)
         .post(apiRoute)
-        .send(role)
+        .send(doc)
         .expect(200)
         .expect('Content-type', /json/)
         .end(function (err, res) {
           should.not.exist(err);
           res.body.should.be.instanceof(Object);
-          res.body.should.have.properties(role);
+          res.body.should.have.properties(doc);
           done(err);
         });
+    });
+  });
+
+  describe('PUT', function () {
+
+    it('should update a document and return the updated version', function (done) {
+      getRandomDoc().then(function (doc) {
+        doc.description = 'Updated the description for this role';
+        request(app)
+          .put(apiRoute + '/' + doc.id)
+          .send(doc)
+          .expect(200)
+          .expect('Content-type', /json/)
+          .end(function (err, res) {
+            should.not.exist(err);
+            res.body.should.be.instanceof(Object);
+            res.body.description.should.equal(doc.description);
+            done(err);
+          });
+      });
+    });
+  });
+
+  describe('DELETE', function () {
+    it('should delete a document', function (done) {
+      getRandomDoc().then(function (doc) {
+        request(app)
+          .delete(apiRoute + '/' + doc.id)
+          .expect(204)
+          .end(function (err, res) {
+            should.not.exist(err);
+            res.body.should.be.empty();
+            request(app)
+              .delete(apiRoute + '/' + doc.id)
+              .expect(404)
+              .end(function (err2, res2) {
+                should.not.exist(err2);
+                res2.body.should.be.empty();
+                done(err);
+              });
+          });
+      });
     });
   });
 

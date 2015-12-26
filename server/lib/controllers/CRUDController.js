@@ -151,12 +151,12 @@ function create (Model, options, callback) {
 function update (model, options, callback) {
   return function (req, res, next) {
     var updatedDoc = req.body;
-    model.findOneAndUpdate({ _id: req.params.id }, updatedDoc, function (err, doc) {
+    model.findOneAndUpdate({ _id: req.params.id }, updatedDoc, { new: true }, function (err, doc) {
       if (err) {
         res.handleError(err);
       } else {
         if (!doc) {
-          res.notContent(doc);
+          res.noContent(doc);
         } else {
           res.ok(doc);
         }
@@ -171,10 +171,10 @@ function destroy (model, options, callback) {
       if (err) {
         res.handleError(err);
       } else {
-        if (!doc) {
-          res.noContent(doc);
+        if (!doc.result.n) {
+          res.notFound();
         } else {
-          res.ok(doc);
+          res.noContent();
         }
       }
     });
