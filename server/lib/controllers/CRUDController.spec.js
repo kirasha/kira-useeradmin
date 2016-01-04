@@ -408,13 +408,37 @@ describe('CRUD Controller', function () {
             done(err);
           });
       });
+
+      it('should return 400 when given an invalid id', function (done) {
+        var fakeId = '0123';
+        request(app)
+          .get(apiRoute + '/' + fakeId)
+          .expect(400)
+          .expect('Content-type', /json/)
+          .end(function (err, res) {
+            should.not.exist(err);
+            res.body.should.be.instanceof(Object);
+            res.body.should.have.properties(['errors','code']);
+            done(err);
+          });
+      });
+
+      it('should return 404 when given an non existing id', function (done) {
+        var doc = new Role(createRole({ name: 'Role 1', builtIn: false }));
+        request(app)
+          .get(apiRoute + '/' + doc._id)
+          .expect(404)
+          .end(function (err, res) {
+            should.not.exist(err);
+            done(err);
+          });
+      });
     });
 
   });
 
   describe('POST', function () {
     it('should create a document and return it', function (done) {
-
       var doc = createRole({ name: 'Role 1', builtIn: false });
       request(app)
         .post(apiRoute)
@@ -428,10 +452,42 @@ describe('CRUD Controller', function () {
           done(err);
         });
     });
+
+    it('should ignore extra proprties not defined on the model', function (done) {
+      var doc = createRole({ name: 'Role 10', builtIn: false });
+      doc.fakeProperty = 'Fake value';
+      request(app)
+        .post(apiRoute)
+        .send(doc)
+        .expect(200)
+        .expect('Content-type', /json/)
+        .end(function (err, res) {
+          should.not.exist(err);
+          res.body.should.be.instanceof(Object);
+          res.body.should.have.not.have.property(doc.fakeProperty);
+          done(err);
+        });
+    });
+
+    it('should return errors if they occur', function (done) {
+      var doc = createRole({ name: 'Role 1', builtIn: false });
+      doc.name = null;
+      request(app)
+        .post(apiRoute)
+        .send(doc)
+        .expect(400)
+        .expect('Content-type', /json/)
+        .end(function (err, res) {
+          should.not.exist(err);
+          res.body.should.be.instanceof(Object);
+          res.body.should.have.properties(['name', 'errors','code','message']);
+          res.body.name.should.equal('ValidationError');
+          done(err);
+        });
+    });
   });
 
   describe('PUT', function () {
-
     it('should update a document and return the updated version', function (done) {
       getRandomDoc().then(function (doc) {
         doc.description = 'Updated the description for this role';
@@ -451,24 +507,30 @@ describe('CRUD Controller', function () {
   });
 
   describe('DELETE', function () {
+    var tobeDeleted;
     it('should delete a document', function (done) {
       getRandomDoc().then(function (doc) {
         request(app)
           .delete(apiRoute + '/' + doc.id)
           .expect(204)
           .end(function (err, res) {
+            tobeDeleted = doc;
             should.not.exist(err);
             res.body.should.be.empty();
-            request(app)
-              .delete(apiRoute + '/' + doc.id)
-              .expect(404)
-              .end(function (err2, res2) {
-                should.not.exist(err2);
-                res2.body.should.be.empty();
-                done(err);
-              });
+            done(err);
           });
       });
+    });
+
+    it('should return 404 if the deleted document does not exist', function (done) {
+      request(app)
+      .delete(apiRoute + '/' + tobeDeleted.id)
+        .expect(404)
+        .end(function (err, res) {
+          should.not.exist(err);
+          res.body.should.be.empty();
+          done(err);
+        });
     });
   });
 

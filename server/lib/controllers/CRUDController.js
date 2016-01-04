@@ -1,10 +1,11 @@
 'use strict';
 
 var _               = require('lodash'),
+    mongoose        = require('mongoose'),
     urlParser       = require('url'),
     defaultOptions  = {};
 
-defaultOptions.omitted = ['_id', '__v'].concat(Object.keys(require('mongoose').Schema.reserved));
+defaultOptions.omitted = ['_id', '__v'].concat(Object.keys(mongoose.Schema.reserved));
 
 defaultOptions.fields = ['id','name','createdAt', 'updatedAt','href'];
 
@@ -14,13 +15,66 @@ function getFields (req) {
   return req.restQuery.fields || defaultFields;
 }
 
+function isValidMongooseId (id) {
+  return mongoose.Types.ObjectId.isValid(id) && /^[a-fA-F0-9]{24}$/.test(id);
+}
+
+function removeReserved (keys) {
+  return keys.filter(function (key) {
+    return !_.includes(defaultOptions.omitted, key);
+  });
+}
+
+function cleanUpData (model, data) {
+  var expectedProperties = removeReserved(Object.keys(model.schema.paths));
+  return _.pick(data, expectedProperties);
+}
+
+function getErrorMessage (error) {
+
+  var errorMessage = {
+    code: 400 | error.code,
+    name: error.name,
+    message: error.message
+  };
+
+  delete error.stack;
+
+  var fields = Object.keys(error.errors);
+
+  if (!fields) {
+    return errorMessage;
+  }
+
+  var parseError = function (field) {
+    var errors = error.errors;
+    var fieldError = errors[field];
+    var devMsg = fieldError.message + '. Current values is ' + fieldError.value;
+    var customMessage = {
+      field: fieldError.path,
+      value: fieldError.value,
+      type: fieldError.name,
+      message: fieldError.message,
+      developerMessage: devMsg
+    };
+
+    return customMessage;
+  };
+
+  var customMessages = fields.map(parseError);
+
+  errorMessage.errors = customMessages;
+
+  return errorMessage;
+}
+
 function defaultEmbed (queryParams) {
 
   if (queryParams && queryParams.embed) {
     var tobeEmbeded = queryParams.embed;
     tobeEmbeded.forEach(function (el) {
       var field = el.split('.')[0];
-      if (queryParams.fields.indexOf(field) == -1) {
+      if (queryParams.fields.indexOf(field) === -1) {
         queryParams.fields.push(field);
       }
     });
@@ -94,35 +148,47 @@ function list (model, options, callback) {
   return function (req, res, next) {
     req.restQuery.fields = getFields(req);
     var restQuery = defaultEmbed(req.restQuery);
-    model.filter(restQuery)
-      .then(function (docs) {
-        if (!docs) {
-          res.noContent(docs);
-        } else {
-          countAll(model, restQuery)
-          .then(function (allCount) {
-            var links = formatLinks(allCount, restQuery.pagination, req.originalUrl);
-            res.ok(docs, { links: links });
-          })
-          .catch(function (err) {
-            res.handleError(err);
-          });
-        }
-      })
-      .catch(function (err) {
-        res.handleError(err);
-      });
+    var docsPromise = model.filter(restQuery);
+    var countsPromis = countAll(model, restQuery);
+    Promise.all([docsPromise, countsPromis]).then(function (promises) {
+      var docs = promises[0];
+      var allCounts = promises[1];
+      var links = formatLinks(allCounts, restQuery.pagination, req.originalUrl);
+      res.ok(docs, { links: links });
+    })
+    .catch(function (err) {
+      res.handleError(err);
+    });
   };
 }
 
 function read (model, options, callback) {
   return function (req, res, next) {
+    var id = req.params.id;
+    if (!isValidMongooseId(id)) {
+      var message = {
+        code: 400,
+        name: 'ValidationError',
+        message: id + ' is not a valid Id',
+        errors: [
+          {
+            field: 'id',
+            value: id,
+            type: 'ValidatorError',
+            message: 'Invalid id',
+            developerMessage: 'A valid id is 12 Character long and must follow the following pattern ^[a-fA-F0-9]{24}$'
+          }
+        ]
+      };
+      return res.badRequest(message);
+    }
+
     model.findOne({ _id: req.params.id }, function (err, doc) {
       if (err) {
         res.handleError(err);
       } else {
         if (!doc) {
-          res.noContent(doc);
+          res.notFound(doc);
         } else {
           res.ok(doc);
         }
@@ -133,10 +199,12 @@ function read (model, options, callback) {
 
 function create (Model, options, callback) {
   return function (req, res, next)  {
-    var model = new Model(req.body);
+    var data = cleanUpData(Model, req.body);
+    var model = new Model(data);
     model.save(function (err, doc) {
       if (err) {
-        res.handleError(err);
+        var errorMessage = getErrorMessage(err);
+        res.handleError(errorMessage);
       } else {
         if (!doc) {
           res.noContent(doc);
@@ -150,10 +218,11 @@ function create (Model, options, callback) {
 
 function update (model, options, callback) {
   return function (req, res, next) {
-    var updatedDoc = req.body;
+    var updatedDoc = cleanUpData(model, req.body);
     model.findOneAndUpdate({ _id: req.params.id }, updatedDoc, { new: true }, function (err, doc) {
       if (err) {
-        res.handleError(err);
+        var errorMessage = getErrorMessage(err);
+        res.handleError(errorMessage);
       } else {
         if (!doc) {
           res.noContent(doc);
@@ -169,7 +238,8 @@ function destroy (model, options, callback) {
   return function (req, res, next) {
     model.remove({ _id: req.params.id }, function (err, doc) {
       if (err) {
-        res.handleError(err);
+        var errorMessage = getErrorMessage(err);
+        res.handleError(errorMessage);
       } else {
         if (!doc.result.n) {
           res.notFound();
