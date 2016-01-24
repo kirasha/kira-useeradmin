@@ -94,7 +94,7 @@ function defaultEmbed (queryParams) {
     var tobeEmbeded = queryParams.embed;
     tobeEmbeded.forEach(function (el) {
       var field = el.split('.')[0];
-      if (queryParams.fields.indexOf(field) === -1) {
+      if (queryParams.fields && queryParams.fields.indexOf(field) === -1) {
         queryParams.fields.push(field);
       }
     });
@@ -116,6 +116,22 @@ function defaultEmbed (queryParams) {
   }
 
   return queryParams;
+}
+
+function getSubDocuments (model) {
+  var paths = model.schema.paths;
+  var keys = Object.keys(paths);
+
+  var subDocs = keys.filter(function (k) {
+    if (Array.isArray(paths[k].options.type)) {
+      var field = paths[k].options.type[0];
+      if (field.type && field.type.schemaName === 'ObjectId') {
+        return paths[k].path;
+      }
+    }
+  });
+
+  return subDocs;
 }
 
 function countAll (model, restQuery) {
@@ -190,7 +206,15 @@ function read (model, options, callback) {
       return res.badRequest(message);
     }
 
-    model.findOne({ _id: req.params.id }, function (err, doc) {
+    // embed sub documents by defaults if not embed specified
+    // or specific field requested
+    if (!req.restQuery.embed && !req.restQuery.fields) {
+      req.restQuery.embed = getSubDocuments(model);
+    }
+
+    var restQuery = defaultEmbed(req.restQuery);
+
+    model.filter(id, restQuery, function (err, doc) {
       if (err) {
         res.handleError(err);
       } else {

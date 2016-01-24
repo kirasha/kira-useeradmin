@@ -403,8 +403,42 @@ describe('CRUD Controller', function () {
           .end(function (err, res) {
             should.not.exist(err);
             res.body.should.be.instanceof(Object);
-            console.log(res.body);
             res.body.should.have.properties(Object.keys(doc));
+            res.body.should.have.properties('permissions');
+            res.body.permissions[0].should.have.properties(['name','id','href']);
+            res.body.id.should.equal(doc.id);
+            done(err);
+          });
+      });
+
+      it('should return requested fields', function (done) {
+        var requestedFields = ['name','description', 'active'];
+        request(app)
+          .get(apiRoute + '/' + doc.id + '?fields=name,description,active')
+          .expect(200)
+          .expect('Content-type', /json/)
+          .end(function (err, res) {
+            should.not.exist(err);
+            res.body.should.be.instanceof(Object);
+            res.body.should.have.properties(requestedFields);
+            res.body.should.not.have.properties('permissions');
+            res.body.id.should.equal(doc.id);
+            done(err);
+          });
+      });
+
+      it('should be able to embed sub documents', function (done) {
+        var embeded = ['permissions.name','permissions.description'];
+        request(app)
+          .get(apiRoute + '/' + doc.id + '?embed=permissions.name,permissions.active')
+          .expect(200)
+          .expect('Content-type', /json/)
+          .end(function (err, res) {
+            should.not.exist(err);
+            res.body.should.be.instanceof(Object);
+            res.body.should.have.properties('permissions');
+            res.body.permissions[0].should.have.properties(['name','active']);
+            res.body.permissions[0].should.not.have.properties(['description']);
             res.body.id.should.equal(doc.id);
             done(err);
           });
