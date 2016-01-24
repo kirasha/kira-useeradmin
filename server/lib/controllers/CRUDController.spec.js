@@ -110,7 +110,7 @@ describe('CRUD Controller', function () {
             should.not.exist(err);
             res.body.should.be.instanceof(Array);
             res.body.should.have.length(roles.length);
-            doc = res.body[0];
+            doc = res.body[2];
             done(err);
           });
       });
@@ -403,6 +403,7 @@ describe('CRUD Controller', function () {
           .end(function (err, res) {
             should.not.exist(err);
             res.body.should.be.instanceof(Object);
+            console.log(res.body);
             res.body.should.have.properties(Object.keys(doc));
             res.body.id.should.equal(doc.id);
             done(err);
@@ -418,7 +419,7 @@ describe('CRUD Controller', function () {
           .end(function (err, res) {
             should.not.exist(err);
             res.body.should.be.instanceof(Object);
-            res.body.should.have.properties(['errors','code']);
+            res.body.should.have.properties(['errors','code', 'message']);
             done(err);
           });
       });
@@ -504,6 +505,34 @@ describe('CRUD Controller', function () {
           });
       });
     });
+
+    it('should return 404 when trying to update an non existing id', function (done) {
+      var doc = new Role(createRole({ name: 'Role 1', builtIn: false }));
+      request(app)
+        .put(apiRoute + '/' + doc._id)
+        .send(doc)
+        .expect(404)
+        .end(function (err, res) {
+          should.not.exist(err);
+          done(err);
+        });
+    });
+
+    it('should return 400 when given an invalid id', function (done) {
+      var fakeId = '0123';
+      var doc = new Role(createRole({ name: 'Role 1', builtIn: false }));
+      request(app)
+        .put(apiRoute + '/' + fakeId)
+        .send(doc)
+        .expect(400)
+        .expect('Content-type', /json/)
+        .end(function (err, res) {
+          should.not.exist(err);
+          res.body.should.be.instanceof(Object);
+          res.body.should.have.properties(['errors','code', 'message']);
+          done(err);
+        });
+    });
   });
 
   describe('DELETE', function () {
@@ -520,6 +549,21 @@ describe('CRUD Controller', function () {
             done(err);
           });
       });
+    });
+
+    it('should return 400 when given an invalid id', function (done) {
+      var fakeId = '0123';
+      var doc = new Role(createRole({ name: 'Role 1', builtIn: false }));
+      request(app)
+        .delete(apiRoute + '/' + fakeId)
+        .expect(400)
+        .expect('Content-type', /json/)
+        .end(function (err, res) {
+          should.not.exist(err);
+          res.body.should.be.instanceof(Object);
+          res.body.should.have.properties(['errors','code', 'message']);
+          done(err);
+        });
     });
 
     it('should return 404 if the deleted document does not exist', function (done) {

@@ -19,6 +19,26 @@ function isValidMongooseId (id) {
   return mongoose.Types.ObjectId.isValid(id) && /^[a-fA-F0-9]{24}$/.test(id);
 }
 
+function getInvalidIdError (id) {
+  id = id || '';
+  var message = {
+    code: 400,
+    name: 'ValidationError',
+    message: id + ' is not a valid Id',
+    errors: [
+      {
+        field: 'id',
+        value: id,
+        type: 'ValidatorError',
+        message: 'Invalid id',
+        developerMessage: 'A valid id is 12 Character long and must follow the following pattern ^[a-fA-F0-9]{24}$'
+      }
+    ]
+  };
+
+  return message;
+}
+
 function removeReserved (keys) {
   return keys.filter(function (key) {
     return !_.includes(defaultOptions.omitted, key);
@@ -166,20 +186,7 @@ function read (model, options, callback) {
   return function (req, res, next) {
     var id = req.params.id;
     if (!isValidMongooseId(id)) {
-      var message = {
-        code: 400,
-        name: 'ValidationError',
-        message: id + ' is not a valid Id',
-        errors: [
-          {
-            field: 'id',
-            value: id,
-            type: 'ValidatorError',
-            message: 'Invalid id',
-            developerMessage: 'A valid id is 12 Character long and must follow the following pattern ^[a-fA-F0-9]{24}$'
-          }
-        ]
-      };
+      var message = getInvalidIdError(id);
       return res.badRequest(message);
     }
 
@@ -218,14 +225,19 @@ function create (Model, options, callback) {
 
 function update (model, options, callback) {
   return function (req, res, next) {
+    var id = req.params.id;
+    if (!isValidMongooseId(id)) {
+      var message = getInvalidIdError(id);
+      return res.badRequest(message);
+    }
     var updatedDoc = cleanUpData(model, req.body);
-    model.findOneAndUpdate({ _id: req.params.id }, updatedDoc, { new: true }, function (err, doc) {
+    model.findOneAndUpdate({ _id: id }, updatedDoc, { new: true }, function (err, doc) {
       if (err) {
         var errorMessage = getErrorMessage(err);
         res.handleError(errorMessage);
       } else {
         if (!doc) {
-          res.noContent(doc);
+          res.notFound(doc);
         } else {
           res.ok(doc);
         }
@@ -236,7 +248,13 @@ function update (model, options, callback) {
 
 function destroy (model, options, callback) {
   return function (req, res, next) {
-    model.remove({ _id: req.params.id }, function (err, doc) {
+    var id = req.params.id;
+    if (!isValidMongooseId(id)) {
+      var message = getInvalidIdError(id);
+      return res.badRequest(message);
+    }
+
+    model.remove({ _id: id }, function (err, doc) {
       if (err) {
         var errorMessage = getErrorMessage(err);
         res.handleError(errorMessage);
