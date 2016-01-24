@@ -9,7 +9,7 @@ var user;
 
 describe('User Model', function () {
   before(function (done) {
-    TestHelper.prepare(User, done);
+    TestHelper.prepare([User, Role], done);
   });
 
   after(function (done) {
@@ -29,8 +29,7 @@ describe('User Model', function () {
   });
 
   afterEach(function (done) {
-    TestHelper.clean(User, done);
-    TestHelper.clean(Role, done);
+    TestHelper.clean([User, Role], done);
   });
 
   it('should begin with no users', function (done) {

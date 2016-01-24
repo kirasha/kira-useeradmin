@@ -2,6 +2,7 @@
 
 var should      = require('should'),
     mongoose    = require('mongoose'),
+    TestHelper  = require('../../lib/testHelper'),
     config      = require('../../config/environment'),
     Permission  = require('../permission/permission.model'),
     Role        = require('./role.model');
@@ -22,19 +23,11 @@ function createRole (name, description) {
 describe('Role Model', function () {
 
   before(function (done) {
-    mongoose.connect(config.mongo.uri, config.mongo.options);
-
-    Role.remove().exec().then(function () {
-      done();
-    });
-
-    Permission.remove().exec().then(function () {
-      done();
-    });
+    TestHelper.prepare([Role, Permission], done);
   });
 
   after(function (done) {
-    mongoose.connection.close(done);
+    TestHelper.end(done);
   });
 
   beforeEach(function (done) {
@@ -43,13 +36,7 @@ describe('Role Model', function () {
   });
 
   afterEach(function (done) {
-    Role.remove().exec().then(function () {
-      done();
-    });
-
-    Permission.remove().exec().then(function () {
-      done();
-    });
+    TestHelper.clean([Role, Permission], done);
   });
 
   describe('create role', function () {

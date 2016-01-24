@@ -2,6 +2,7 @@
 
 var should      = require('should'),
     mongoose    = require('mongoose'),
+    TestHelper  = require('../../lib/testHelper'),
     config      = require('../../config/environment'),
     Permission  = require('./permission.model');
 
@@ -21,15 +22,11 @@ function createPermission (name, description) {
 describe('Permission Model', function () {
 
   before(function (done) {
-    mongoose.connect(config.mongo.uri, config.mongo.options);
-    // clear permissions before start testing
-    Permission.remove().exec().then(function () {
-      done();
-    });
+    TestHelper.prepare(Permission, done);
   });
 
   after(function (done) {
-    mongoose.connection.close(done);
+    TestHelper.end(done);
   });
 
   beforeEach(function (done) {
@@ -38,9 +35,7 @@ describe('Permission Model', function () {
   });
 
   afterEach(function (done) {
-    Permission.remove().exec().then(function () {
-      done();
-    });
+    TestHelper.clean(Permission, done);
   });
 
   describe('create Permission', function () {

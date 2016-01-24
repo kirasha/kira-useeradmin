@@ -12,7 +12,7 @@ var mongoose    = require('mongoose'),
 /**
  * Prepares the model before running unit test. Tt will establish mongoose connection
  * and cleans {@link clean} up the model so that unit test can start in a clean state
- * @param {Object} model The model to prepare
+ * @param {Object} model The model to prepare. (Can be an array of models)
  * @param {function} done The callback to call when done
  */
 exports.prepare = function (model, done) {
@@ -31,7 +31,7 @@ exports.end = function (done) {
 
 /**
  * Cleans the the model to make sure that unit tests start with a clean state.
- * @param {Object} model The model to clean
+ * @param {Object} model The model to clean (Can be an array of models)
  * @param {function} done The callback to call when done
  */
 
@@ -42,10 +42,22 @@ exports.clean = function (model, done) {
   }
 
   if (model) {
-    return model.remove().exec().then(function () {
-      done();
-    });
-  }
+    if (Array.isArray(model)) {
 
-  done();
+      var promises = model.map(function (m) {
+        return m.remove().exec();
+      });
+
+      Promise.all(promises).then(function () {
+        done();
+      }).catch(function (err) {
+        done(err);
+      });
+
+    } else {
+      return model.remove().exec().then(function () {
+        done();
+      });
+    }
+  }
 };
