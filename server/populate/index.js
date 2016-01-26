@@ -56,7 +56,7 @@ function populate (doneCb) {
       rolePromises = roles.map(function (roleObj) {
         return saveRole(roleObj);
       });
-      Promise.all(rolePromises).then(function (promises) {
+      Promise.all(rolePromises).then(function () {
         doneCb();
       });
       console.log('Populating ' + rolePromises.length + ' roles');

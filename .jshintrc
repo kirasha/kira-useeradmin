@@ -3,7 +3,6 @@
   "eqeqeq": true,
   "forin": true,
   "freeze": true,
-  "globalstrict": true,
   "latedef": true,
   "laxbreak": true,
   "maxdepth": 3,

@@ -1,8 +1,6 @@
 'use strict';
 
-var _               = require('lodash'),
-    // sample express app
-    config    = require('../../config/environment'),
+var config    = require('../../config/environment'),
     mongoose  = require('mongoose'),
     app         = require('express')(),
 
@@ -22,7 +20,6 @@ var _               = require('lodash'),
     TestHelper  = require('../../lib/testHelper'),
     request     = require('supertest'),
     should      = require('should'),
-    permissions = require('../../populate/permissions.json'),
     roles       = require('../../populate/roles.json'),
     populate    = require('../../populate');
 
@@ -428,7 +425,6 @@ describe('CRUD Controller', function () {
       });
 
       it('should be able to embed sub documents', function (done) {
-        var embeded = ['permissions.name','permissions.description'];
         request(app)
           .get(apiRoute + '/' + doc.id + '?embed=permissions.name,permissions.active')
           .expect(200)
@@ -464,6 +460,7 @@ describe('CRUD Controller', function () {
           .get(apiRoute + '/' + doc._id)
           .expect(404)
           .end(function (err, res) {
+            should.not.exist(res.body);
             should.not.exist(err);
             done(err);
           });
@@ -548,6 +545,7 @@ describe('CRUD Controller', function () {
         .expect(404)
         .end(function (err, res) {
           should.not.exist(err);
+          should.not.exist(res.body);
           done(err);
         });
     });
@@ -587,7 +585,6 @@ describe('CRUD Controller', function () {
 
     it('should return 400 when given an invalid id', function (done) {
       var fakeId = '0123';
-      var doc = new Role(createRole({ name: 'Role 1', builtIn: false }));
       request(app)
         .delete(apiRoute + '/' + fakeId)
         .expect(400)
