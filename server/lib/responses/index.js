@@ -13,9 +13,6 @@ var _ = require('lodash');
 var ok = require('./ok');
 var errors = require('./errors');
 
-// export all available reponse methods
-module.exports = _.assign({ sendData: sendData },	ok,	errors);
-
 /**
  * Default response output handler
  * @param {mixed} data - The data that should be send to the client
@@ -60,3 +57,6 @@ function sendData (data, options) {
 
   return res.json(data);
 }
+
+// export all available reponse methods
+module.exports = _.assign({ sendData: sendData },	ok,	errors);

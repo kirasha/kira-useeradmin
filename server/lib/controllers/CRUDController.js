@@ -53,7 +53,7 @@ function cleanUpData (model, data) {
 function getErrorMessage (error) {
 
   var errorMessage = {
-    code: 400 | error.code,
+    code: 400 || error.code,
     name: error.name,
     message: error.message
   };
@@ -180,8 +180,8 @@ function formatLinks (all, pagination, originalUrl) {
   return pagingMetaData;
 }
 
-function list (model, options, callback) {
-  return function (req, res, next) {
+function list (model) {
+  return function (req, res) {
     req.restQuery.fields = getFields(req);
     var restQuery = defaultEmbed(req.restQuery);
     var docsPromise = model.filter(restQuery);
@@ -198,8 +198,8 @@ function list (model, options, callback) {
   };
 }
 
-function read (model, options, callback) {
-  return function (req, res, next) {
+function read (model) {
+  return function (req, res) {
     var id = req.params.id;
     if (!isValidMongooseId(id)) {
       var message = getInvalidIdError(id);
@@ -228,8 +228,8 @@ function read (model, options, callback) {
   };
 }
 
-function create (Model, options, callback) {
-  return function (req, res, next)  {
+function create (Model) {
+  return function (req, res)  {
     var data = cleanUpData(Model, req.body);
     var model = new Model(data);
     model.save(function (err, doc) {
@@ -247,8 +247,8 @@ function create (Model, options, callback) {
   };
 }
 
-function update (model, options, callback) {
-  return function (req, res, next) {
+function update (model) {
+  return function (req, res) {
     var id = req.params.id;
     if (!isValidMongooseId(id)) {
       var message = getInvalidIdError(id);
@@ -270,8 +270,8 @@ function update (model, options, callback) {
   };
 }
 
-function destroy (model, options, callback) {
-  return function (req, res, next) {
+function destroy (model) {
+  return function (req, res) {
     var id = req.params.id;
     if (!isValidMongooseId(id)) {
       var message = getInvalidIdError(id);
@@ -300,20 +300,20 @@ function parseOptions (options) {
 module.exports = function (model, defaultOptions) {
   defaultOptions = parseOptions(defaultOptions);
   return {
-    list: function (options, callback) {
-      return list(model, options, callback);
+    list: function () {
+      return list(model);
     },
-    read: function (options, callback) {
-      return read(model, options, callback);
+    read: function () {
+      return read(model);
     },
-    create: function (options, callback) {
-      return create(model, options, callback);
+    create: function () {
+      return create(model);
     },
-    update:  function (options, callback) {
-      return update(model, options, callback);
+    update:  function () {
+      return update(model);
     },
-    destroy: function (options, callback) {
-      return destroy(model, options, callback);
+    destroy: function () {
+      return destroy(model);
     }
   };
 };

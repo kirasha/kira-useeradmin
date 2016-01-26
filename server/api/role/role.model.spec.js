@@ -1,9 +1,7 @@
 'use strict';
 
 var should      = require('should'),
-    mongoose    = require('mongoose'),
     TestHelper  = require('../../lib/testHelper'),
-    config      = require('../../config/environment'),
     Permission  = require('../permission/permission.model'),
     Role        = require('./role.model');
 
