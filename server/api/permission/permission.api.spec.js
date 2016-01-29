@@ -81,13 +81,34 @@ describe('Permissions API', function () {
         });
     })
     .catch(function (err) {
-      console.log(err);
+      done(err);
+    });
+  });
+
+  it('should return a single document on GET/{id}', function (done) {
+
+    generatePermissions().then(function (permissions) {
+      var index = Math.floor(Math.random() * permissions.length);
+      var permission = permissions[index];
+      request(app)
+        .get('/api/permissions/' + permission._id)
+        .expect(200)
+        .expect('Content-type', /json/)
+        .end(function (err, res) {
+          should.not.exist(err);
+          should.exist(res);
+          res.body.should.be.instanceof(Object);
+          permission._id.toString().should.equal(res.body.id);
+          done();
+        });
+    })
+    .catch(function (err) {
+      console.log('An error occured!', err);
       done(err);
     });
   });
 
   it('should create a permission on POST /api/permissions', function (done) {
-
     var permission = createPermission();
     request(app)
       .post('/api/permissions')
@@ -97,15 +118,31 @@ describe('Permissions API', function () {
       .end(function (err, res) {
         should.not.exist(err);
         res.body.should.be.instanceof(Object);
+        res.body.should.have.properties(Object.keys(permission));
         done(err);
       });
   });
 
-  /*
-  it('should be able to update permissions on PUT /api/permissions', function (done) {
-    done();
+  it('should be able to update permissions on PUT /api/permissions/{id}', function (done) {
+    generatePermissions().then(function (permissions) {
+      var index = Math.floor(Math.random() * permissions.length);
+      var permission = permissions[index];
+      permission.description = 'Updated Description';
+      request(app)
+        .put('/api/permissions/' + permission._id)
+        .send(permission)
+        .expect(200)
+        .expect('Content-type', /json/)
+        .end(function (err, res) {
+          should.not.exist(err);
+          should.exist(res);
+          res.body.should.be.instanceof(Object);
+          permission._id.toString().should.equal(res.body.id);
+          permission.description.should.equal(res.body.description);
+          done();
+        });
+    });
   });
-  //*/
 
 });
 
