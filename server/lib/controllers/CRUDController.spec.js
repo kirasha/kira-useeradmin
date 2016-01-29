@@ -60,10 +60,7 @@ describe('CRUD Controller', function () {
   });
 
   after(function (done) {
-    TestHelper.clean(Role, function () {
-      TestHelper.clean(Permission, done);
-    });
-    done();
+    TestHelper.clean([Permission, Role], done);
   });
 
   function createRole (attrs) {
